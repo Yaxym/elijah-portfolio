@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import WorkCard from "./WorkCard";
-import type { Work } from "@/lib/works";
+import type { Work } from "@/lib/types";
 import Container from "./Container";
 
 const CATEGORIES = [
