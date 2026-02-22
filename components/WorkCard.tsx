@@ -1,4 +1,4 @@
-import type { Work } from "@/lib/works";
+import type { Work } from "@/lib/types";
 
 export default function WorkCard({ work }: { work: Work }) {
   return (
