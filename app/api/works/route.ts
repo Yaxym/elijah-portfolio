@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin, supabasePublic } from "@/lib/supabase";
 import { isAdmin } from "@/lib/adminAuth";
@@ -87,7 +88,7 @@ export async function POST(req: NextRequest) {
   // upload file
   const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
   const safeExt = ["png", "jpg", "jpeg", "webp"].includes(ext) ? ext : "jpg";
-  const filePath = `covers/${Date.now()}-${crypto.randomUUID()}.${safeExt}`;
+  const filePath = `covers/${Date.now()}-${randomUUID()}.${safeExt}`;
 
   const arrayBuffer = await file.arrayBuffer();
   const { error: upErr } = await supa.storage
@@ -158,7 +159,7 @@ export async function PUT(req: NextRequest) {
   if (file && file.size > 0) {
     const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
     const safeExt = ["png", "jpg", "jpeg", "webp"].includes(ext) ? ext : "jpg";
-    const filePath = `covers/${Date.now()}-${crypto.randomUUID()}.${safeExt}`;
+    const filePath = `covers/${Date.now()}-${randomUUID()}.${safeExt}`;
 
     const arrayBuffer = await file.arrayBuffer();
     const { error: upErr } = await supa.storage.from("works-covers").upload(filePath, arrayBuffer, {
