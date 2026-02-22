@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 type Work = {
   id: string;
@@ -8,6 +8,7 @@ type Work = {
   subtitle?: string;
   description?: string;
   cover: string;
+  images?: string[]; // NEW
   category: string;
   tags: string[];
   year?: number;
@@ -37,6 +38,9 @@ export default function AdminPage() {
 
   const [editingId, setEditingId] = useState<string | null>(null);
 
+  // UI helper for remove images (edit mode)
+  const [removeSelected, setRemoveSelected] = useState<Record<string, boolean>>({});
+
   async function load() {
     const r = await fetch("/api/works", { cache: "no-store" });
     const d = await r.json().catch(() => ({}));
@@ -51,6 +55,17 @@ export default function AdminPage() {
     () => works.find((w) => w.id === editingId) || null,
     [works, editingId]
   );
+
+  useEffect(() => {
+    // when open editing — reset selection
+    if (editing?.images?.length) {
+      const initial: Record<string, boolean> = {};
+      for (const url of editing.images) initial[url] = false;
+      setRemoveSelected(initial);
+    } else {
+      setRemoveSelected({});
+    }
+  }, [editingId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function createWork(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -84,6 +99,17 @@ export default function AdminPage() {
     const fd = new FormData(e.currentTarget);
     fd.set("id", editingId);
 
+    // build removeImages from selected checkboxes
+    const toRemove = Object.entries(removeSelected)
+      .filter(([, v]) => v)
+      .map(([k]) => k);
+
+    if (toRemove.length) {
+      fd.set("removeImages", toRemove.join(","));
+    } else {
+      fd.delete("removeImages");
+    }
+
     const res = await fetch("/api/works", { method: "PUT", body: fd });
     const data = await res.json().catch(() => ({}));
 
@@ -100,7 +126,7 @@ export default function AdminPage() {
   }
 
   async function deleteWork(id: string) {
-    const ok = confirm("Удалить работу? Это удалит запись и попробует удалить обложку.");
+    const ok = confirm("Удалить работу? Это удалит запись и попробует удалить файлы.");
     if (!ok) return;
 
     setMsg("");
@@ -151,15 +177,30 @@ export default function AdminPage() {
           <div className="text-sm font-semibold">Добавить новую работу</div>
 
           <form onSubmit={createWork} className="mt-5 grid gap-4">
-            <div>
-              <label className="text-xs text-white/60">Обложка (png/jpg/webp)</label>
-              <input
-                name="cover"
-                type="file"
-                accept="image/png,image/jpeg,image/jpg,image/webp"
-                required
-                className="mt-2 block w-full rounded-2xl bg-white/5 p-3 text-sm ring-1 ring-white/10"
-              />
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
+                <label className="text-xs text-white/60">Обложка (png/jpg/webp)</label>
+                <input
+                  name="cover"
+                  type="file"
+                  accept="image/png,image/jpeg,image/jpg,image/webp"
+                  required
+                  className="mt-2 block w-full rounded-2xl bg-white/5 p-3 text-sm ring-1 ring-white/10"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs text-white/60">
+                  Доп. картинки (необязательно, можно несколько)
+                </label>
+                <input
+                  name="images"
+                  type="file"
+                  multiple
+                  accept="image/png,image/jpeg,image/jpg,image/webp"
+                  className="mt-2 block w-full rounded-2xl bg-white/5 p-3 text-sm ring-1 ring-white/10"
+                />
+              </div>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
@@ -256,113 +297,169 @@ export default function AdminPage() {
               </button>
             </div>
 
-            <div className="mt-4 flex gap-4">
-              <img
-                src={editing.cover}
-                alt=""
-                className="hidden h-28 w-44 rounded-2xl object-cover ring-1 ring-white/10 md:block"
-              />
+            <div className="mt-4 grid gap-6">
+              <div className="flex gap-4">
+                <img
+                  src={editing.cover}
+                  alt=""
+                  className="hidden h-28 w-44 rounded-2xl object-cover ring-1 ring-white/10 md:block"
+                />
 
-              <form onSubmit={updateWork} className="grid flex-1 gap-4">
-                <div>
-                  <label className="text-xs text-white/60">Новая обложка (необязательно)</label>
-                  <input
-                    name="cover"
-                    type="file"
-                    accept="image/png,image/jpeg,image/jpg,image/webp"
-                    className="mt-2 block w-full rounded-2xl bg-white/5 p-3 text-sm ring-1 ring-white/10"
-                  />
-                </div>
+                <form onSubmit={updateWork} className="grid flex-1 gap-4">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div>
+                      <label className="text-xs text-white/60">Новая обложка (необязательно)</label>
+                      <input
+                        name="cover"
+                        type="file"
+                        accept="image/png,image/jpeg,image/jpg,image/webp"
+                        className="mt-2 block w-full rounded-2xl bg-white/5 p-3 text-sm ring-1 ring-white/10"
+                      />
+                    </div>
 
-                <div className="grid gap-4 md:grid-cols-2">
+                    <div>
+                      <label className="text-xs text-white/60">
+                        Добавить картинки (необязательно, можно несколько)
+                      </label>
+                      <input
+                        name="images"
+                        type="file"
+                        multiple
+                        accept="image/png,image/jpeg,image/jpg,image/webp"
+                        className="mt-2 block w-full rounded-2xl bg-white/5 p-3 text-sm ring-1 ring-white/10"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div>
+                      <label className="text-xs text-white/60">Название</label>
+                      <input
+                        name="title"
+                        defaultValue={editing.title}
+                        className="mt-2 h-11 w-full rounded-2xl bg-white/5 px-4 text-sm text-white ring-1 ring-white/10 outline-none focus:ring-white/20"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-white/60">Подзаголовок</label>
+                      <input
+                        name="subtitle"
+                        defaultValue={editing.subtitle || ""}
+                        className="mt-2 h-11 w-full rounded-2xl bg-white/5 px-4 text-sm text-white ring-1 ring-white/10 outline-none focus:ring-white/20"
+                      />
+                    </div>
+                  </div>
+
                   <div>
-                    <label className="text-xs text-white/60">Название</label>
+                    <label className="text-xs text-white/60">Описание</label>
+                    <textarea
+                      name="description"
+                      defaultValue={editing.description || ""}
+                      className="mt-2 min-h-28 w-full rounded-2xl bg-white/5 px-4 py-3 text-sm text-white ring-1 ring-white/10 outline-none focus:ring-white/20"
+                    />
+                  </div>
+
+                  <div className="grid gap-4 md:grid-cols-3">
+                    <div>
+                      <label className="text-xs text-white/60">Категория</label>
+                      <select
+                        name="category"
+                        defaultValue={editing.category}
+                        className="mt-2 h-11 w-full rounded-2xl bg-white/5 px-4 text-sm ring-1 ring-white/10 outline-none focus:ring-white/20"
+                      >
+                        {CATEGORIES.map((c) => (
+                          <option key={c} value={c} className="bg-[#06070a]">
+                            {c}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-white/60">Год</label>
+                      <input
+                        name="year"
+                        defaultValue={editing.year ?? ""}
+                        className="mt-2 h-11 w-full rounded-2xl bg-white/5 px-4 text-sm text-white ring-1 ring-white/10 outline-none focus:ring-white/20"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-white/60">Ссылка</label>
+                      <input
+                        name="href"
+                        defaultValue={editing.href || ""}
+                        className="mt-2 h-11 w-full rounded-2xl bg-white/5 px-4 text-sm text-white ring-1 ring-white/10 outline-none focus:ring-white/20"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-xs text-white/60">Теги</label>
                     <input
-                      name="title"
-                      defaultValue={editing.title}
+                      name="tags"
+                      defaultValue={tagsToString(editing.tags)}
                       className="mt-2 h-11 w-full rounded-2xl bg-white/5 px-4 text-sm text-white ring-1 ring-white/10 outline-none focus:ring-white/20"
                     />
                   </div>
 
-                  <div>
-                    <label className="text-xs text-white/60">Подзаголовок</label>
-                    <input
-                      name="subtitle"
-                      defaultValue={editing.subtitle || ""}
-                      className="mt-2 h-11 w-full rounded-2xl bg-white/5 px-4 text-sm text-white ring-1 ring-white/10 outline-none focus:ring-white/20"
-                    />
-                  </div>
-                </div>
+                  {/* hidden input used by server, we fill it in code */}
+                  <input name="removeImages" type="hidden" />
 
-                <div>
-                  <label className="text-xs text-white/60">Описание</label>
-                  <textarea
-                    name="description"
-                    defaultValue={editing.description || ""}
-                    className="mt-2 min-h-28 w-full rounded-2xl bg-white/5 px-4 py-3 text-sm text-white ring-1 ring-white/10 outline-none focus:ring-white/20"
-                  />
-                </div>
-
-                <div className="grid gap-4 md:grid-cols-3">
-                  <div>
-                    <label className="text-xs text-white/60">Категория</label>
-                    <select
-                      name="category"
-                      defaultValue={editing.category}
-                      className="mt-2 h-11 w-full rounded-2xl bg-white/5 px-4 text-sm ring-1 ring-white/10 outline-none focus:ring-white/20"
+                  <div className="flex flex-wrap items-center gap-3 pt-1">
+                    <button
+                      disabled={loading}
+                      className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black disabled:opacity-60"
                     >
-                      {CATEGORIES.map((c) => (
-                        <option key={c} value={c} className="bg-[#06070a]">
-                          {c}
-                        </option>
-                      ))}
-                    </select>
+                      {loading ? "..." : "Сохранить"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => deleteWork(editing.id)}
+                      className="rounded-full bg-red-500/20 px-5 py-2.5 text-sm font-semibold text-white ring-1 ring-red-500/30 hover:bg-red-500/25"
+                    >
+                      Удалить
+                    </button>
                   </div>
 
-                  <div>
-                    <label className="text-xs text-white/60">Год</label>
-                    <input
-                      name="year"
-                      defaultValue={editing.year ?? ""}
-                      className="mt-2 h-11 w-full rounded-2xl bg-white/5 px-4 text-sm text-white ring-1 ring-white/10 outline-none focus:ring-white/20"
-                    />
+                  {msg ? <div className="text-sm text-white/70">{msg}</div> : null}
+                </form>
+              </div>
+
+              {/* Existing gallery images with selection for removal */}
+              <div className="rounded-3xl bg-white/5 p-5 ring-1 ring-white/10">
+                <div className="text-sm font-semibold">Галерея</div>
+                <p className="mt-1 text-xs text-white/60">
+                  Отметь картинки для удаления и нажми “Сохранить”. Новые добавляются через поле “Добавить картинки”.
+                </p>
+
+                {(editing.images || []).length ? (
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    {(editing.images || []).map((url) => (
+                      <label
+                        key={url}
+                        className="group relative overflow-hidden rounded-2xl bg-white/5 ring-1 ring-white/10"
+                      >
+                        <img src={url} alt="" className="h-36 w-full object-cover" />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition" />
+                        <div className="absolute left-3 top-3 flex items-center gap-2 rounded-full bg-black/50 px-3 py-1.5 text-xs ring-1 ring-white/10">
+                          <input
+                            type="checkbox"
+                            checked={!!removeSelected[url]}
+                            onChange={(e) =>
+                              setRemoveSelected((s) => ({ ...s, [url]: e.target.checked }))
+                            }
+                          />
+                          <span>Удалить</span>
+                        </div>
+                      </label>
+                    ))}
                   </div>
-
-                  <div>
-                    <label className="text-xs text-white/60">Ссылка</label>
-                    <input
-                      name="href"
-                      defaultValue={editing.href || ""}
-                      className="mt-2 h-11 w-full rounded-2xl bg-white/5 px-4 text-sm text-white ring-1 ring-white/10 outline-none focus:ring-white/20"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-xs text-white/60">Теги</label>
-                  <input
-                    name="tags"
-                    defaultValue={tagsToString(editing.tags)}
-                    className="mt-2 h-11 w-full rounded-2xl bg-white/5 px-4 text-sm text-white ring-1 ring-white/10 outline-none focus:ring-white/20"
-                  />
-                </div>
-
-                <div className="flex flex-wrap items-center gap-3 pt-1">
-                  <button
-                    disabled={loading}
-                    className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black disabled:opacity-60"
-                  >
-                    {loading ? "..." : "Сохранить"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => deleteWork(editing.id)}
-                    className="rounded-full bg-red-500/20 px-5 py-2.5 text-sm font-semibold text-white ring-1 ring-red-500/30 hover:bg-red-500/25"
-                  >
-                    Удалить
-                  </button>
-                </div>
-              </form>
+                ) : (
+                  <div className="mt-3 text-sm text-white/60">Пока нет дополнительных картинок.</div>
+                )}
+              </div>
             </div>
           </div>
         ) : null}
@@ -379,7 +476,10 @@ export default function AdminPage() {
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <div className="text-sm font-semibold">{w.title}</div>
-                      <div className="text-xs text-white/55">{w.category}</div>
+                      <div className="text-xs text-white/55">
+                        {w.category}
+                        {typeof w.images?.length === "number" ? ` • +${w.images.length} img` : ""}
+                      </div>
                     </div>
                     <button
                       onClick={() => setEditingId(w.id)}
@@ -391,7 +491,10 @@ export default function AdminPage() {
 
                   <div className="mt-3 flex flex-wrap gap-1.5">
                     {(w.tags || []).slice(0, 6).map((t) => (
-                      <span key={t} className="rounded-full bg-white/5 px-2 py-1 text-[11px] text-white/60 ring-1 ring-white/10">
+                      <span
+                        key={t}
+                        className="rounded-full bg-white/5 px-2 py-1 text-[11px] text-white/60 ring-1 ring-white/10"
+                      >
                         {t}
                       </span>
                     ))}

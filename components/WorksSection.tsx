@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import WorkCard from "./WorkCard";
 import type { Work } from "@/lib/types";
 import Container from "./Container";
+import WorkModal from "./WorkModal";
 
 const CATEGORIES = [
   "Все",
@@ -21,6 +22,7 @@ export default function WorksSection() {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("Все");
   const [tag, setTag] = useState<string>("");
+  const [active, setActive] = useState<Work | null>(null);
 
   useEffect(() => {
     fetch("/api/works", { cache: "no-store" })
@@ -94,7 +96,6 @@ export default function WorksSection() {
           </div>
         </div>
 
-        {/* tags */}
         <div className="mt-6 flex flex-wrap gap-2">
           <button
             onClick={() => setTag("")}
@@ -120,7 +121,7 @@ export default function WorksSection() {
 
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((w) => (
-            <WorkCard key={w.id} work={w} />
+            <WorkCard key={w.id} work={w} onOpen={setActive} />
           ))}
         </div>
 
@@ -130,6 +131,8 @@ export default function WorksSection() {
           </div>
         ) : null}
       </Container>
+
+      <WorkModal work={active} onClose={() => setActive(null)} />
     </section>
   );
 }

@@ -1,79 +1,93 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
 import Container from "./Container";
+import type { Work } from "@/lib/types";
+import WorkCard from "./WorkCard";
+import WorkModal from "./WorkModal";
+
+function pickRandom<T>(arr: T[], n: number) {
+  const a = [...arr];
+  // Fisher–Yates
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a.slice(0, Math.min(n, a.length));
+}
 
 export default function Hero() {
-  return (
-    <section id="top" className="relative overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 opacity-70">
-        <div className="absolute -left-40 top-[-200px] h-[520px] w-[520px] rounded-full bg-indigo-500/20 blur-[90px]" />
-        <div className="absolute right-[-200px] top-[-220px] h-[520px] w-[520px] rounded-full bg-fuchsia-500/15 blur-[90px]" />
-      </div>
+  const [works, setWorks] = useState<Work[]>([]);
+  const [active, setActive] = useState<Work | null>(null);
 
+  useEffect(() => {
+    fetch("/api/works", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d) => setWorks(d.works || []))
+      .catch(() => setWorks([]));
+  }, []);
+
+  // каждый рефреш страницы — новая 4ка
+  const featured = useMemo(() => pickRandom(works, 4), [works]);
+
+  return (
+    <section className="pt-16 md:pt-24">
       <Container>
-        <div className="grid gap-10 py-14 md:grid-cols-[1.1fr_.9fr] md:py-20">
-          <div className="space-y-6">
+        <div className="grid items-start gap-10 lg:grid-cols-[1.1fr_0.9fr]">
+          {/* left */}
+          <div>
             <h1 className="text-4xl font-semibold leading-[1.05] md:text-6xl">
               High-impact <br />
               визуалы для <br />
               digital-продуктов.
             </h1>
 
-            <p className="max-w-xl text-base text-white/65 md:text-lg">
-              Финтех, SaaS, digital-сервисы. Запуски, performance-кампании,
-              продуктовые экосистемы.
+            <p className="mt-5 max-w-xl text-sm text-white/60 md:text-base">
+              Финтех, SaaS, digital-сервисы. Запуски, performance-кампании, продуктовые экосистемы.
             </p>
 
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="mt-7 flex flex-wrap gap-3">
               <a
                 href="#works"
-                className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black hover:opacity-90"
+                className="inline-flex items-center justify-center rounded-full bg-white/10 px-5 py-3 text-sm font-medium text-white ring-1 ring-white/15 hover:bg-white/15"
               >
-                Смотреть работы
+                Смотреть работы →
               </a>
               <a
                 href="#contacts"
-                className="rounded-full bg-white/10 px-5 py-2.5 text-sm font-semibold text-white ring-1 ring-white/10 hover:bg-white/15"
+                className="inline-flex items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-medium text-black hover:bg-white/90"
               >
                 Обсудить проект
               </a>
             </div>
 
-            <div className="flex flex-wrap gap-2 pt-2 text-xs text-white/55">
-              {["Key Visual", "3D", "Performance", "Product Visual"].map((t) => (
-                <span key={t} className="rounded-full bg-white/5 px-3 py-1 ring-1 ring-white/10">
+            <div className="mt-6 flex flex-wrap gap-2 text-xs text-white/60">
+              {["Key Visuals", "3D/CG", "Performance Ads", "Product Visuals"].map((t) => (
+                <span key={t} className="rounded-full bg-white/5 px-3 py-1.5 ring-1 ring-white/10">
                   {t}
                 </span>
               ))}
             </div>
           </div>
 
-          <div className="grid gap-4 md:pt-3">
-            <div className="rounded-3xl bg-white/5 p-4 ring-1 ring-white/10">
-              <div className="aspect-[16/10] rounded-2xl bg-gradient-to-br from-white/10 to-white/5 ring-1 ring-white/10" />
-              <div className="mt-3">
-                <div className="text-sm font-semibold">Мобильная коммерция</div>
-                <div className="text-xs text-white/55">Launch Key Visual</div>
-              </div>
+          {/* right – как на референсе: 2 колонки, по 2 карточки */}
+          <div className="grid gap-4 md:grid-cols-2">
+            {/* col 1 */}
+            <div className="flex flex-col gap-4">
+              {featured[0] ? <WorkCard work={featured[0]} onOpen={setActive} coverHeightClass="h-56 md:h-60" /> : null}
+              {featured[1] ? <WorkCard work={featured[1]} onOpen={setActive} coverHeightClass="h-56 md:h-60" /> : null}
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="rounded-3xl bg-white/5 p-4 ring-1 ring-white/10">
-                <div className="aspect-square rounded-2xl bg-gradient-to-br from-white/10 to-white/5 ring-1 ring-white/10" />
-                <div className="mt-3">
-                  <div className="text-sm font-semibold">Трансгран</div>
-                  <div className="text-xs text-white/55">Global Finance Visual</div>
-                </div>
-              </div>
-              <div className="rounded-3xl bg-white/5 p-4 ring-1 ring-white/10">
-                <div className="aspect-square rounded-2xl bg-gradient-to-br from-white/10 to-white/5 ring-1 ring-white/10" />
-                <div className="mt-3">
-                  <div className="text-sm font-semibold">Запуск METEO</div>
-                  <div className="text-xs text-white/55">Performance KV</div>
-                </div>
-              </div>
+            {/* col 2 */}
+            <div className="flex flex-col gap-4">
+              {featured[2] ? <WorkCard work={featured[2]} onOpen={setActive} coverHeightClass="h-56 md:h-60" /> : null}
+              {featured[3] ? <WorkCard work={featured[3]} onOpen={setActive} coverHeightClass="h-56 md:h-60" /> : null}
             </div>
           </div>
         </div>
       </Container>
+
+      <WorkModal work={active} onClose={() => setActive(null)} />
     </section>
   );
 }

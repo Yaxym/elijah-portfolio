@@ -4,6 +4,7 @@ export type Work = {
   subtitle?: string;
   description?: string;
   cover: string;
+  images: string[]; // <-- NEW
   category: string;
   tags: string[];
   year?: number;
