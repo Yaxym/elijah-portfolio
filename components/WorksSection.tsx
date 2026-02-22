@@ -69,7 +69,6 @@ export default function WorksSection() {
             <h2 className="text-2xl font-semibold md:text-3xl">Работы</h2>
             <p className="mt-2 max-w-2xl text-sm text-white/60">
               Каждый проект — это задача бизнеса, концепт и система реализации.
-              Добавляй новые работы через <span className="text-white/80">/admin</span>.
             </p>
           </div>
 
