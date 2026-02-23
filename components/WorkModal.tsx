@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import type { Work } from "@/lib/types";
 
 export default function WorkModal({
@@ -10,44 +10,34 @@ export default function WorkModal({
   work: Work | null;
   onClose: () => void;
 }) {
-  const [idx, setIdx] = useState(0);
-
   const images = useMemo(() => {
     if (!work) return [];
     const arr = Array.isArray(work.images) && work.images.length > 0 ? work.images : [work.cover];
-    // на всякий случай уберём дубли
+    // убираем дубли/пустые
     return Array.from(new Set(arr.filter(Boolean)));
   }, [work]);
-
-  useEffect(() => {
-    setIdx(0);
-  }, [work?.id]);
 
   useEffect(() => {
     if (!work) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
-      if (e.key === "ArrowLeft") setIdx((v) => (v - 1 + images.length) % images.length);
-      if (e.key === "ArrowRight") setIdx((v) => (v + 1) % images.length);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [work, images.length, onClose]);
+  }, [work, onClose]);
 
   if (!work) return null;
 
-  const current = images[idx] || work.cover;
-
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4"
+      className="fixed inset-0 z-[100] bg-black/70 p-3 md:p-6"
       onMouseDown={(e) => {
-        // клик по фону закрывает
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="w-full max-w-5xl overflow-hidden rounded-3xl bg-[#0b0d12] ring-1 ring-white/10">
-        <div className="flex items-start justify-between gap-4 border-b border-white/10 p-4 md:p-5">
+      <div className="mx-auto h-[calc(100vh-24px)] w-full max-w-6xl overflow-hidden rounded-3xl bg-[#0b0d12] ring-1 ring-white/10 md:h-[calc(100vh-48px)]">
+        {/* header */}
+        <div className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-white/10 bg-[#0b0d12]/80 p-4 backdrop-blur md:p-5">
           <div className="min-w-0">
             <div className="truncate text-base font-semibold md:text-lg">{work.title}</div>
             {work.subtitle ? <div className="mt-1 text-sm text-white/60">{work.subtitle}</div> : null}
@@ -61,99 +51,75 @@ export default function WorkModal({
           </button>
         </div>
 
-        <div className="grid gap-0 md:grid-cols-[1.35fr_0.65fr]">
-          {/* Left: image */}
-          <div className="relative bg-black/30">
-            <img
-              src={current}
-              alt={work.title}
-              className="h-[50vh] w-full object-contain md:h-[70vh]"
-            />
-
-            {images.length > 1 ? (
-              <>
-                <button
-                  onClick={() => setIdx((v) => (v - 1 + images.length) % images.length)}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-black/50 px-3 py-2 text-white ring-1 ring-white/10 hover:bg-black/70"
-                  aria-label="Prev"
-                >
-                  ←
-                </button>
-                <button
-                  onClick={() => setIdx((v) => (v + 1) % images.length)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-black/50 px-3 py-2 text-white ring-1 ring-white/10 hover:bg-black/70"
-                  aria-label="Next"
-                >
-                  →
-                </button>
-              </>
-            ) : null}
-          </div>
-
-          {/* Right: info */}
-          <div className="space-y-4 p-4 md:p-5">
-            <div className="flex flex-wrap gap-2">
-              <span className="rounded-full bg-white/5 px-3 py-1 text-xs text-white/75 ring-1 ring-white/10">
-                {work.category}
-              </span>
-              {work.year ? (
-                <span className="rounded-full bg-white/5 px-3 py-1 text-xs text-white/75 ring-1 ring-white/10">
-                  {work.year}
-                </span>
-              ) : null}
+        {/* body */}
+        <div className="h-[calc(100%-64px)] overflow-y-auto md:h-[calc(100%-72px)]">
+          <div className="grid gap-6 p-4 md:grid-cols-[1.55fr_.45fr] md:p-6">
+            {/* images column */}
+            <div className="space-y-4">
+              {(images.length ? images : [work.cover]).map((src, i) => (
+                <div key={`${src}-${i}`} className="overflow-hidden rounded-3xl bg-black/25 ring-1 ring-white/10">
+                  <img
+                    src={src}
+                    alt={`${work.title} — ${i + 1}`}
+                    className="w-full object-contain"
+                    loading="lazy"
+                  />
+                </div>
+              ))}
             </div>
 
-            {work.description ? (
-              <div className="text-sm leading-relaxed text-white/70 whitespace-pre-wrap">
-                {work.description}
-              </div>
-            ) : (
-              <div className="text-sm text-white/50">Описание не добавлено.</div>
-            )}
-
-            {work.tags?.length ? (
-              <div className="flex flex-wrap gap-1.5">
-                {work.tags.map((t) => (
-                  <span
-                    key={t}
-                    className="rounded-full bg-white/5 px-2.5 py-1 text-[11px] text-white/65 ring-1 ring-white/10"
-                  >
-                    {t}
+            {/* info column */}
+            <aside className="md:sticky md:top-[88px] md:h-fit">
+              <div className="rounded-3xl bg-white/5 p-5 ring-1 ring-white/10">
+                <div className="flex flex-wrap gap-2">
+                  <span className="rounded-full bg-white/5 px-3 py-1 text-xs text-white/75 ring-1 ring-white/10">
+                    {work.category}
                   </span>
-                ))}
-              </div>
-            ) : null}
+                  {work.year ? (
+                    <span className="rounded-full bg-white/5 px-3 py-1 text-xs text-white/75 ring-1 ring-white/10">
+                      {work.year}
+                    </span>
+                  ) : null}
+                </div>
 
-            {work.href ? (
-              <a
-                href={work.href}
-                target="_blank"
-                className="inline-flex rounded-full bg-white px-4 py-2 text-sm font-medium text-black hover:bg-white/90"
-              >
-                Открыть ссылку →
-              </a>
-            ) : null}
+                <div className="mt-4">
+                  {work.description ? (
+                    <div className="text-sm leading-relaxed text-white/70 whitespace-pre-wrap">
+                      {work.description}
+                    </div>
+                  ) : (
+                    <div className="text-sm text-white/50">Описание не добавлено.</div>
+                  )}
+                </div>
 
-            {/* thumbs */}
-            {images.length > 1 ? (
-              <div className="pt-2">
-                <div className="text-xs text-white/50">Галерея</div>
-                <div className="mt-2 grid grid-cols-5 gap-2">
-                  {images.slice(0, 10).map((u, i) => (
-                    <button
-                      key={u}
-                      onClick={() => setIdx(i)}
-                      className={`overflow-hidden rounded-xl ring-1 transition ${
-                        i === idx ? "ring-white/40" : "ring-white/10 hover:ring-white/25"
-                      }`}
-                      title={`#${i + 1}`}
-                    >
-                      <img src={u} alt="" className="h-14 w-full object-cover" loading="lazy" />
-                    </button>
-                  ))}
+                {work.tags?.length ? (
+                  <div className="mt-4 flex flex-wrap gap-1.5">
+                    {work.tags.map((t) => (
+                      <span
+                        key={t}
+                        className="rounded-full bg-white/5 px-2.5 py-1 text-[11px] text-white/65 ring-1 ring-white/10"
+                      >
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
+
+                {work.href ? (
+                  <a
+                    href={work.href}
+                    target="_blank"
+                    className="mt-5 inline-flex w-full justify-center rounded-full bg-white px-4 py-2.5 text-sm font-medium text-black hover:bg-white/90"
+                  >
+                    Открыть ссылку →
+                  </a>
+                ) : null}
+
+                <div className="mt-4 text-xs text-white/45">
+                  {images.length} изображений
                 </div>
               </div>
-            ) : null}
+            </aside>
           </div>
         </div>
       </div>

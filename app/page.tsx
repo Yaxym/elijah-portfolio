@@ -14,60 +14,89 @@ export default function HomePage() {
         <WorksSection />
         <Services />
 
-        <section id="about" className="py-14 md:py-20">
+        <section id="about" className="py-14 md:py-24">
           <Container>
-            <h2 className="text-2xl font-semibold md:text-3xl">Обо мне</h2>
+            <div className="max-w-3xl">
+              <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">Обо мне</h2>
+              <p className="mt-3 text-sm text-white/60 md:text-base">
+                Создаю high-impact визуалы для digital-продуктов, финтеха и SaaS.
+                3D key visuals, рекламные кампании и визуальные системы для роста и запусков.
+              </p>
+            </div>
 
-            <div className="mt-8 grid gap-4 md:grid-cols-[1.4fr_.6fr]">
-              <div className="rounded-3xl bg-white/5 p-6 ring-1 ring-white/10">
-                <div className="text-sm font-semibold">Елисей Афанасьев</div>
-                <div className="mt-2 text-sm text-white/60">
-                  В дизайне более 10 лет. Работаю на стыке 3D, брендинга и performance-маркетинга.
-                  Помогаю продуктам выглядеть дороже, убедительнее и сильнее в конкурентной среде.
+            <div className="mt-10 grid gap-4 md:grid-cols-[1.55fr_.85fr]">
+              {/* LEFT BIG CARD */}
+              <div className="rounded-[28px] bg-white/[0.06] p-7 ring-1 ring-white/10 md:p-8">
+                <div className="text-xl font-semibold md:text-2xl">Елисей Афанасьев</div>
+                <div className="mt-2 text-sm text-white/65">
+                  Visual Designer • 3D Key Visual • Performance Visual Systems
                 </div>
 
-                <div className="mt-6 text-xs text-white/60">
-                  <div className="font-semibold text-white/80">Работаю с:</div>
-                  <ul className="mt-3 space-y-2">
+                <div className="mt-6 space-y-4 text-sm leading-relaxed text-white/60">
+                  <p>
+                    В дизайне более 10 лет. Работаю на стыке 3D, брендинга и performance-маркетинга.
+                    Помогаю продуктам выглядеть дороже, убедительнее и сильнее в конкурентной среде.
+                  </p>
+                  <p>
+                    Мне важно не просто сделать красиво — а усилить продукт через визуал:
+                    ясность, статус, эмоция, конверсия.
+                  </p>
+                </div>
+
+                <div className="mt-7">
+                  <div className="text-sm font-semibold text-white/80">Работаю с:</div>
+                  <ul className="mt-4 space-y-3 text-sm text-white/60">
                     {[
                       "3D key visuals для запусков",
                       "Performance-креативы",
                       "Визуальные системы для digital-сервисов",
-                      "Интеграция визуалов в интерфейсы",
+                      "Интеграция 3D в интерфейсы",
                     ].map((x) => (
-                      <li key={x} className="flex gap-2">
-                        <span className="mt-[6px] h-1.5 w-1.5 rounded-full bg-white/40" />
+                      <li key={x} className="flex gap-3">
+                        <span className="mt-[8px] h-1.5 w-1.5 shrink-0 rounded-full bg-white/40" />
                         <span>{x}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
+
+                <div className="mt-7 flex flex-wrap gap-2 text-xs text-white/60">
+                  {["3D / CG", "Key Visuals", "Performance Ads", "UI Integration"].map((t) => (
+                    <span key={t} className="rounded-full bg-white/5 px-3 py-1.5 ring-1 ring-white/10">
+                      {t}
+                    </span>
+                  ))}
+                </div>
               </div>
 
-              <div className="rounded-3xl bg-white/5 p-6 ring-1 ring-white/10">
-                <div className="text-sm font-semibold">Фокус</div>
-                <div className="mt-3 space-y-2 text-xs text-white/60">
-                  <div className="flex items-center justify-between gap-2">
-                    <span>3D + digital-коммуникации</span>
-                    <span className="text-white/45">основа</span>
-                  </div>
-                  <div className="flex items-center justify-between gap-2">
-                    <span>Скорость и системность</span>
-                    <span className="text-white/45">под запуск</span>
-                  </div>
-                  <div className="flex items-center justify-between gap-2">
-                    <span>Форматы</span>
-                    <span className="text-white/45">продукты / кампании</span>
-                  </div>
-                </div>
+              {/* RIGHT STACK */}
+              <div className="space-y-4">
+                <div className="rounded-[28px] bg-white/[0.06] p-7 ring-1 ring-white/10 md:p-8">
+                  <div className="text-sm font-semibold">Фокус</div>
 
-                <div className="mt-6 rounded-2xl bg-black/30 p-4 ring-1 ring-white/10">
-                  <div className="text-xs font-semibold text-white/80">Как работаю</div>
-                  <ol className="mt-2 space-y-2 text-xs text-white/60">
-                    <li>1) Погружение в продукт и задачу</li>
-                    <li>2) Концепт + ключевые референсы</li>
-                    <li>3) Система адаптаций и финал</li>
-                  </ol>
+                  <div className="mt-5 space-y-4 text-sm text-white/60">
+                    <div className="flex items-baseline justify-between gap-3">
+                      <span>3D + digital-коммуникации</span>
+                      <span className="text-xs text-white/45">основа</span>
+                    </div>
+                    <div className="flex items-baseline justify-between gap-3">
+                      <span>Скорость и системность</span>
+                      <span className="text-xs text-white/45">под запуск</span>
+                    </div>
+                    <div className="flex items-baseline justify-between gap-3">
+                      <span>Форматы</span>
+                      <span className="text-xs text-white/45">продукты / кампании</span>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 rounded-2xl bg-black/30 p-5 ring-1 ring-white/10">
+                    <div className="text-sm font-semibold text-white/80">Как работаю</div>
+                    <ol className="mt-3 space-y-2 text-sm text-white/60">
+                      <li>1) Погружение в продукт и задачу</li>
+                      <li>2) Концепт + ключевые референсы</li>
+                      <li>3) Система адаптаций и финал</li>
+                    </ol>
+                  </div>
                 </div>
               </div>
             </div>
