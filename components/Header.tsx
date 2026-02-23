@@ -6,7 +6,14 @@ export default function Header() {
       <Container>
         <div className="flex h-16 items-center justify-between">
           <a href="#top" className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-xl bg-white/10 ring-1 ring-white/10" />
+            {/* LOGO / AVATAR */}
+            <img
+              src="/avatar.png" // положи файл в /public/avatar.png
+              alt="Елисей Афанасьев"
+              className="h-9 w-9 rounded-full object-cover ring-1 ring-white/15 bg-white/5"
+              loading="eager"
+            />
+
             <div className="leading-tight">
               <div className="text-sm font-semibold">Елисей Афанасьев</div>
               <div className="text-xs text-white/55">Visual Designer • 3D • Motion</div>
@@ -14,10 +21,18 @@ export default function Header() {
           </a>
 
           <nav className="hidden items-center gap-6 text-sm text-white/70 md:flex">
-            <a className="hover:text-white" href="#works">Работы</a>
-            <a className="hover:text-white" href="#services">Услуги</a>
-            <a className="hover:text-white" href="#about">Обо мне</a>
-            <a className="hover:text-white" href="#contacts">Контакты</a>
+            <a className="hover:text-white" href="#works">
+              Работы
+            </a>
+            <a className="hover:text-white" href="#services">
+              Услуги
+            </a>
+            <a className="hover:text-white" href="#about">
+              Обо мне
+            </a>
+            <a className="hover:text-white" href="#contacts">
+              Контакты
+            </a>
           </nav>
 
           <div className="flex items-center gap-2">
