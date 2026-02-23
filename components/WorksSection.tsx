@@ -85,7 +85,7 @@ export default function WorksSection() {
   }, [page, pageCount]);
 
   function pageButtons() {
-    // компактная пагинация: показываем до 7 кнопок
+    // компактная пагинация показываем до 7 кнопок
     const maxBtns = 7;
     const half = Math.floor(maxBtns / 2);
 
