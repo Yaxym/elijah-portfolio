@@ -5,7 +5,6 @@ import Container from "./Container";
 import type { Work } from "@/lib/types";
 import WorkCard from "./WorkCard";
 import WorkModal from "./WorkModal";
-import Reveal from "./Reveal";
 
 function pickRandom<T>(arr: T[], n: number) {
   const a = [...arr];
@@ -33,6 +32,7 @@ export default function Hero() {
     <section className="pt-16 md:pt-24">
       <Container>
         <div className="grid items-start gap-10 lg:grid-cols-[1.1fr_0.9fr]">
+          {/* left */}
           <div>
             <h1 className="text-4xl font-semibold leading-[1.05] md:text-6xl">
               High-impact <br />
@@ -68,30 +68,23 @@ export default function Hero() {
             </div>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
+          {/* right: скрываем на телефонах */}
+          <div className="hidden md:grid gap-4 md:grid-cols-2">
             <div className="flex flex-col gap-4">
               {featured[0] ? (
-                <Reveal>
-                  <WorkCard work={featured[0]} onOpen={setActive} />
-                </Reveal>
+                <WorkCard work={featured[0]} onOpen={setActive} coverHeightClass="h-56 md:h-60" />
               ) : null}
               {featured[1] ? (
-                <Reveal>
-                  <WorkCard work={featured[1]} onOpen={setActive} />
-                </Reveal>
+                <WorkCard work={featured[1]} onOpen={setActive} coverHeightClass="h-56 md:h-60" />
               ) : null}
             </div>
 
             <div className="flex flex-col gap-4">
               {featured[2] ? (
-                <Reveal>
-                  <WorkCard work={featured[2]} onOpen={setActive} />
-                </Reveal>
+                <WorkCard work={featured[2]} onOpen={setActive} coverHeightClass="h-56 md:h-60" />
               ) : null}
               {featured[3] ? (
-                <Reveal>
-                  <WorkCard work={featured[3]} onOpen={setActive} />
-                </Reveal>
+                <WorkCard work={featured[3]} onOpen={setActive} coverHeightClass="h-56 md:h-60" />
               ) : null}
             </div>
           </div>
