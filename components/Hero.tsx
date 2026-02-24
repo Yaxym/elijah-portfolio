@@ -5,10 +5,10 @@ import Container from "./Container";
 import type { Work } from "@/lib/types";
 import WorkCard from "./WorkCard";
 import WorkModal from "./WorkModal";
+import Reveal from "./Reveal";
 
 function pickRandom<T>(arr: T[], n: number) {
   const a = [...arr];
-  // Fisher–Yates
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [a[i], a[j]] = [a[j], a[i]];
@@ -27,14 +27,12 @@ export default function Hero() {
       .catch(() => setWorks([]));
   }, []);
 
-  // каждый рефреш страницы — новая 4ка
   const featured = useMemo(() => pickRandom(works, 4), [works]);
 
   return (
     <section className="pt-16 md:pt-24">
       <Container>
         <div className="grid items-start gap-10 lg:grid-cols-[1.1fr_0.9fr]">
-          {/* left */}
           <div>
             <h1 className="text-4xl font-semibold leading-[1.05] md:text-6xl">
               High-impact <br />
@@ -70,18 +68,31 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* right – как на референсе: 2 колонки, по 2 карточки */}
           <div className="grid gap-4 md:grid-cols-2">
-            {/* col 1 */}
             <div className="flex flex-col gap-4">
-              {featured[0] ? <WorkCard work={featured[0]} onOpen={setActive} coverHeightClass="h-56 md:h-60" /> : null}
-              {featured[1] ? <WorkCard work={featured[1]} onOpen={setActive} coverHeightClass="h-56 md:h-60" /> : null}
+              {featured[0] ? (
+                <Reveal>
+                  <WorkCard work={featured[0]} onOpen={setActive} />
+                </Reveal>
+              ) : null}
+              {featured[1] ? (
+                <Reveal>
+                  <WorkCard work={featured[1]} onOpen={setActive} />
+                </Reveal>
+              ) : null}
             </div>
 
-            {/* col 2 */}
             <div className="flex flex-col gap-4">
-              {featured[2] ? <WorkCard work={featured[2]} onOpen={setActive} coverHeightClass="h-56 md:h-60" /> : null}
-              {featured[3] ? <WorkCard work={featured[3]} onOpen={setActive} coverHeightClass="h-56 md:h-60" /> : null}
+              {featured[2] ? (
+                <Reveal>
+                  <WorkCard work={featured[2]} onOpen={setActive} />
+                </Reveal>
+              ) : null}
+              {featured[3] ? (
+                <Reveal>
+                  <WorkCard work={featured[3]} onOpen={setActive} />
+                </Reveal>
+              ) : null}
             </div>
           </div>
         </div>

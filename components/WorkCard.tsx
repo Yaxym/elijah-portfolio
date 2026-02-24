@@ -1,13 +1,12 @@
 import type { Work } from "@/lib/types";
+import FadeInImage from "./FadeInImage";
 
 export default function WorkCard({
   work,
   onOpen,
-  coverHeightClass = "h-52",
 }: {
   work: Work;
   onOpen?: (w: Work) => void;
-  coverHeightClass?: string;
 }) {
   const clickable = typeof onOpen === "function";
 
@@ -21,15 +20,16 @@ export default function WorkCard({
       tabIndex={clickable ? 0 : undefined}
       onKeyDown={(e) => {
         if (!clickable) return;
-        if (e.key === "Enter" || e.key === " ") onOpen(work);
+        if (e.key === "Enter" || e.key === " ") onOpen?.(work);
       }}
     >
       <div className="relative">
-        <img
+        {/* 1:1 cover */}
+        <FadeInImage
+          wrapperClassName="relative w-full aspect-square"
           src={work.cover}
           alt={work.title}
-          className={`${coverHeightClass} w-full object-cover opacity-95 transition group-hover:opacity-100`}
-          loading="lazy"
+          className="h-full w-full object-cover opacity-95 transition group-hover:opacity-100"
         />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/0 to-black/0" />
       </div>

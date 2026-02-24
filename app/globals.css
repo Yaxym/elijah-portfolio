@@ -5,6 +5,10 @@
     color-scheme: dark;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     @apply bg-[#06070a] text-white;
   }
@@ -12,5 +16,42 @@
   * {
     scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
     scrollbar-width: thin;
+  }
+}
+
+/* === Animations === */
+@keyframes fadeSlide {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0px);
+    filter: blur(0px);
+  }
+}
+
+@keyframes imgFade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+    filter: blur(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0px);
+    filter: blur(0px);
+  }
+}
+
+@layer utilities {
+  .animate-fade-slide {
+    animation: fadeSlide 260ms ease-out both;
+  }
+
+  .animate-img-fade {
+    animation: imgFade 380ms ease-out both;
   }
 }

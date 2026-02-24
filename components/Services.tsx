@@ -1,4 +1,5 @@
 import Container from "./Container";
+import Reveal from "./Reveal";
 
 const services = [
   {
@@ -39,24 +40,25 @@ export default function Services() {
       <Container>
         <h2 className="text-2xl font-semibold md:text-3xl">Услуги</h2>
         <p className="mt-2 max-w-2xl text-sm text-white/60">
-          High-impact 3D & performance visuals for fintech, SaaS and digital products.
-          Launches. Campaigns. Product ecosystems.
+          High-impact 3D & performance visuals for fintech, SaaS and digital products. Launches. Campaigns. Product ecosystems.
         </p>
 
         <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {services.map((s) => (
-            <div key={s.title} className="rounded-3xl bg-white/5 p-5 ring-1 ring-white/10">
-              <div className="text-sm font-semibold">{s.title}</div>
-              <div className="mt-2 text-sm text-white/60">{s.desc}</div>
-              <ul className="mt-4 space-y-2 text-xs text-white/65">
-                {s.bullets.map((b) => (
-                  <li key={b} className="flex gap-2">
-                    <span className="mt-[6px] h-1.5 w-1.5 rounded-full bg-white/40" />
-                    <span>{b}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <Reveal key={s.title}>
+              <div className="rounded-3xl bg-white/5 p-5 ring-1 ring-white/10">
+                <div className="text-sm font-semibold">{s.title}</div>
+                <div className="mt-2 text-sm text-white/60">{s.desc}</div>
+                <ul className="mt-4 space-y-2 text-xs text-white/65">
+                  {s.bullets.map((b) => (
+                    <li key={b} className="flex gap-2">
+                      <span className="mt-[6px] h-1.5 w-1.5 rounded-full bg-white/40" />
+                      <span>{b}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </Reveal>
           ))}
         </div>
       </Container>
