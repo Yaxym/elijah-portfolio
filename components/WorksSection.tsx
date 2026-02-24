@@ -5,7 +5,6 @@ import WorkCard from "./WorkCard";
 import type { Work } from "@/lib/types";
 import Container from "./Container";
 import WorkModal from "./WorkModal";
-import Reveal from "./Reveal";
 
 const CATEGORIES = [
   "Все",
@@ -18,7 +17,7 @@ const CATEGORIES = [
   "UI Integration",
 ];
 
-const PER_PAGE = 9;
+const PAGE_SIZE = 6;
 
 export default function WorksSection() {
   const [works, setWorks] = useState<Work[]>([]);
@@ -28,7 +27,9 @@ export default function WorksSection() {
   const [active, setActive] = useState<Work | null>(null);
 
   const [page, setPage] = useState(1);
-  const sectionRef = useRef<HTMLElement | null>(null);
+  const [anim, setAnim] = useState<"idle" | "out" | "in">("idle");
+
+  const topRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     fetch("/api/works", { cache: "no-store" })
@@ -51,7 +52,14 @@ export default function WorksSection() {
       const inTag = tag ? (w.tags || []).includes(tag) : true;
 
       const inQuery = q
-        ? [w.title, w.subtitle, w.description, w.category, ...(w.tags || []), String(w.year || "")]
+        ? [
+            w.title,
+            w.subtitle,
+            w.description,
+            w.category,
+            ...(w.tags || []),
+            String(w.year || ""),
+          ]
             .filter(Boolean)
             .join(" ")
             .toLowerCase()
@@ -62,55 +70,44 @@ export default function WorksSection() {
     });
   }, [works, query, category, tag]);
 
-  // reset page when filters change
+  // сбрасываем страницу при изменении фильтров
   useEffect(() => {
     setPage(1);
   }, [query, category, tag]);
 
-  const totalPages = useMemo(() => Math.max(1, Math.ceil(filtered.length / PER_PAGE)), [filtered.length]);
+  const totalPages = useMemo(() => {
+    return Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  }, [filtered.length]);
 
+  // не даём странице выйти за границы
   useEffect(() => {
-    if (page > totalPages) setPage(totalPages);
-  }, [page, totalPages]);
+    setPage((p) => Math.min(Math.max(1, p), totalPages));
+  }, [totalPages]);
 
-  const paged = useMemo(() => {
-    const start = (page - 1) * PER_PAGE;
-    return filtered.slice(start, start + PER_PAGE);
+  const pageItems = useMemo(() => {
+    const start = (page - 1) * PAGE_SIZE;
+    return filtered.slice(start, start + PAGE_SIZE);
   }, [filtered, page]);
 
-  function goPage(p: number) {
-    const next = Math.min(totalPages, Math.max(1, p));
-    setPage(next);
+  function goToPage(next: number) {
+    const target = Math.min(Math.max(1, next), totalPages);
+    if (target === page) return;
 
-    // smooth scroll back to section top (so pagination feels snappy)
-    window.requestAnimationFrame(() => {
-      const el = document.getElementById("works");
-      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
+    setAnim("out");
+    window.setTimeout(() => {
+      setPage(target);
+      // поднимаем к сетке работ
+      topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      setAnim("in");
+      window.setTimeout(() => setAnim("idle"), 180);
+    }, 160);
   }
-
-  // keep ref for future if needed
-  useEffect(() => {
-    sectionRef.current = document.getElementById("works") as any;
-  }, []);
-
-  const pageNumbers = useMemo(() => {
-    // compact pagination: show up to 5 pages around current
-    const max = 5;
-    const half = Math.floor(max / 2);
-
-    let start = Math.max(1, page - half);
-    let end = Math.min(totalPages, start + max - 1);
-    start = Math.max(1, end - max + 1);
-
-    const arr: number[] = [];
-    for (let i = start; i <= end; i++) arr.push(i);
-    return arr;
-  }, [page, totalPages]);
 
   return (
     <section id="works" className="py-14 md:py-20">
       <Container>
+        <div ref={topRef} />
+
         <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
           <div>
             <h2 className="text-2xl font-semibold md:text-3xl">Работы</h2>
@@ -164,79 +161,39 @@ export default function WorksSection() {
           ))}
         </div>
 
-        {/* page content */}
-        <div key={`${page}-${filtered.length}-${category}-${tag}-${query}`} className="mt-8 animate-fade-slide">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {paged.map((w) => (
-              <Reveal key={w.id}>
-                <WorkCard work={w} onOpen={setActive} />
-              </Reveal>
-            ))}
-          </div>
+        {/* grid with smooth page switch */}
+        <div
+          className={`mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 transition duration-200 ${
+            anim === "out" ? "opacity-0 translate-y-2" : anim === "in" ? "opacity-100 translate-y-0" : "opacity-100"
+          }`}
+        >
+          {pageItems.map((w) => (
+            <WorkCard key={w.id} work={w} onOpen={setActive} />
+          ))}
         </div>
 
         {/* pagination */}
-        {filtered.length > 0 ? (
-          <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
-            <div className="text-xs text-white/55">
-              Показано: {(page - 1) * PER_PAGE + 1}–{Math.min(page * PER_PAGE, filtered.length)} из {filtered.length}
+        {totalPages > 1 ? (
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
+            <button
+              onClick={() => goToPage(page - 1)}
+              disabled={page <= 1}
+              className="rounded-full bg-white/5 px-4 py-2 text-sm text-white/80 ring-1 ring-white/10 hover:bg-white/10 disabled:opacity-40"
+            >
+              ← Назад
+            </button>
+
+            <div className="mx-2 text-sm text-white/60">
+              {page} / {totalPages}
             </div>
 
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => goPage(page - 1)}
-                disabled={page <= 1}
-                className="rounded-full bg-white/5 px-3 py-2 text-xs text-white/80 ring-1 ring-white/10 hover:bg-white/10 disabled:opacity-40 disabled:hover:bg-white/5"
-              >
-                ←
-              </button>
-
-              {pageNumbers[0] > 1 ? (
-                <>
-                  <button
-                    onClick={() => goPage(1)}
-                    className="rounded-full bg-white/5 px-3 py-2 text-xs text-white/80 ring-1 ring-white/10 hover:bg-white/10"
-                  >
-                    1
-                  </button>
-                  <span className="px-1 text-xs text-white/35">…</span>
-                </>
-              ) : null}
-
-              {pageNumbers.map((p) => (
-                <button
-                  key={p}
-                  onClick={() => goPage(p)}
-                  className={`rounded-full px-3 py-2 text-xs ring-1 transition ${
-                    p === page
-                      ? "bg-white text-black ring-white"
-                      : "bg-white/5 text-white/80 ring-white/10 hover:bg-white/10"
-                  }`}
-                >
-                  {p}
-                </button>
-              ))}
-
-              {pageNumbers[pageNumbers.length - 1] < totalPages ? (
-                <>
-                  <span className="px-1 text-xs text-white/35">…</span>
-                  <button
-                    onClick={() => goPage(totalPages)}
-                    className="rounded-full bg-white/5 px-3 py-2 text-xs text-white/80 ring-1 ring-white/10 hover:bg-white/10"
-                  >
-                    {totalPages}
-                  </button>
-                </>
-              ) : null}
-
-              <button
-                onClick={() => goPage(page + 1)}
-                disabled={page >= totalPages}
-                className="rounded-full bg-white/5 px-3 py-2 text-xs text-white/80 ring-1 ring-white/10 hover:bg-white/10 disabled:opacity-40 disabled:hover:bg-white/5"
-              >
-                →
-              </button>
-            </div>
+            <button
+              onClick={() => goToPage(page + 1)}
+              disabled={page >= totalPages}
+              className="rounded-full bg-white/5 px-4 py-2 text-sm text-white/80 ring-1 ring-white/10 hover:bg-white/10 disabled:opacity-40"
+            >
+              Вперёд →
+            </button>
           </div>
         ) : null}
 

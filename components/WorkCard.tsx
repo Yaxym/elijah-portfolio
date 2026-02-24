@@ -1,5 +1,4 @@
 import type { Work } from "@/lib/types";
-import FadeInImage from "./FadeInImage";
 
 export default function WorkCard({
   work,
@@ -23,13 +22,13 @@ export default function WorkCard({
         if (e.key === "Enter" || e.key === " ") onOpen?.(work);
       }}
     >
-      <div className="relative">
-        {/* 1:1 cover */}
-        <FadeInImage
-          wrapperClassName="relative w-full aspect-square"
+      {/* square media */}
+      <div className="relative aspect-square w-full">
+        <img
           src={work.cover}
           alt={work.title}
-          className="h-full w-full object-cover opacity-95 transition group-hover:opacity-100"
+          loading="lazy"
+          className="absolute inset-0 h-full w-full object-cover opacity-95 transition group-hover:opacity-100"
         />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/0 to-black/0" />
       </div>
