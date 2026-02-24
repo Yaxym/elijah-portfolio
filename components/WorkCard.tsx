@@ -3,9 +3,11 @@ import type { Work } from "@/lib/types";
 export default function WorkCard({
   work,
   onOpen,
+  coverHeightClass = "aspect-square", // по умолчанию 1:1
 }: {
   work: Work;
   onOpen?: (w: Work) => void;
+  coverHeightClass?: string;
 }) {
   const clickable = typeof onOpen === "function";
 
@@ -14,7 +16,7 @@ export default function WorkCard({
       className={`group overflow-hidden rounded-3xl bg-white/5 ring-1 ring-white/10 transition hover:bg-white/[0.07] ${
         clickable ? "cursor-pointer" : ""
       }`}
-      onClick={() => (clickable ? onOpen(work) : undefined)}
+      onClick={() => (clickable ? onOpen?.(work) : undefined)}
       role={clickable ? "button" : undefined}
       tabIndex={clickable ? 0 : undefined}
       onKeyDown={(e) => {
@@ -22,14 +24,17 @@ export default function WorkCard({
         if (e.key === "Enter" || e.key === " ") onOpen?.(work);
       }}
     >
-      {/* square media */}
-      <div className="relative aspect-square w-full">
-        <img
-          src={work.cover}
-          alt={work.title}
-          loading="lazy"
-          className="absolute inset-0 h-full w-full object-cover opacity-95 transition group-hover:opacity-100"
-        />
+      <div className="relative">
+        {/* 1:1 обложка */}
+        <div className={`${coverHeightClass} w-full overflow-hidden`}>
+          <img
+            src={work.cover}
+            alt={work.title}
+            className="h-full w-full object-cover opacity-95 transition group-hover:opacity-100"
+            loading="lazy"
+          />
+        </div>
+
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/0 to-black/0" />
       </div>
 
@@ -37,7 +42,9 @@ export default function WorkCard({
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <div className="truncate text-sm font-semibold">{work.title}</div>
-            {work.subtitle ? <div className="mt-0.5 truncate text-xs text-white/55">{work.subtitle}</div> : null}
+            {work.subtitle ? (
+              <div className="mt-0.5 truncate text-xs text-white/55">{work.subtitle}</div>
+            ) : null}
           </div>
 
           <span className="shrink-0 rounded-full bg-white/5 px-2.5 py-1 text-[11px] text-white/70 ring-1 ring-white/10">

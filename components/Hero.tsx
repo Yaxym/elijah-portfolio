@@ -68,23 +68,23 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* right: скрываем на телефонах */}
-          <div className="hidden md:grid gap-4 md:grid-cols-2">
+          {/* right */}
+          <div className="grid gap-4 md:grid-cols-2">
             <div className="flex flex-col gap-4">
               {featured[0] ? (
-                <WorkCard work={featured[0]} onOpen={setActive} coverHeightClass="h-56 md:h-60" />
+                <WorkCard work={featured[0]} onOpen={setActive} coverHeightClass="aspect-square" />
               ) : null}
               {featured[1] ? (
-                <WorkCard work={featured[1]} onOpen={setActive} coverHeightClass="h-56 md:h-60" />
+                <WorkCard work={featured[1]} onOpen={setActive} coverHeightClass="aspect-square" />
               ) : null}
             </div>
 
             <div className="flex flex-col gap-4">
               {featured[2] ? (
-                <WorkCard work={featured[2]} onOpen={setActive} coverHeightClass="h-56 md:h-60" />
+                <WorkCard work={featured[2]} onOpen={setActive} coverHeightClass="aspect-square" />
               ) : null}
               {featured[3] ? (
-                <WorkCard work={featured[3]} onOpen={setActive} coverHeightClass="h-56 md:h-60" />
+                <WorkCard work={featured[3]} onOpen={setActive} coverHeightClass="aspect-square" />
               ) : null}
             </div>
           </div>
